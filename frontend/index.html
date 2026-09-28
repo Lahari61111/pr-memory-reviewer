@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MemReview | AI Code Reviewer with Memory</title>
+<style>
+:root{--bg:#0b1020;--card:#131a2e;--line:#243056;--txt:#e8ecf8;--mut:#8f9bbd;--red:#ef4444;--grn:#22c55e;--acc:#7c5cff;--warn:#f59e0b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:Segoe UI,Helvetica,Arial,sans-serif;font-size:16px}header{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:10px}.logo{font-size:24px;font-weight:800}.logo span{color:var(--acc)}.tag,.note{color:var(--mut);font-size:14px}.status{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mut)}.dot{width:10px;height:10px;border-radius:50%;background:#64748b}.dot.ok{background:var(--grn)}.dot.bad{background:var(--red)}main{max-width:1200px;margin:0 auto;padding:24px 32px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}h3{margin:0 0 10px;font-size:15px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}textarea,input{width:100%;background:#0a0f1f;color:#d7e0ff;border:1px solid var(--line);border-radius:10px;padding:12px;font-family:Consolas,monospace;font-size:14px}textarea#code{height:160px;resize:vertical}textarea#note{height:70px;resize:vertical;font-family:Segoe UI,Helvetica,Arial,sans-serif}.row,.prmeta,.feedback-actions{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}.prmeta{background:#0a0f1f;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--mut)}.prnum{color:#a78bfa;font-weight:700}button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:12px 22px;font-size:16px;font-weight:600;cursor:pointer}button:hover{filter:brightness(1.1)}button:disabled{opacity:.5;cursor:wait}button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt);padding:8px 14px;font-size:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:22px}@media(max-width:800px){.grid{grid-template-columns:1fr}main{padding:18px}}.res{min-height:270px}.res.no{border-color:#5b2530}.res.yes{border-color:#1d5a37}.badge{display:inline-block;padding:5px 12px;border-radius:999px;font-weight:700;font-size:14px;margin-bottom:12px}.no .badge{background:#3a1720;color:#fca5a5}.yes .badge{background:#123524;color:#86efac}.out{white-space:pre-wrap;line-height:1.55}.ph{color:var(--mut)}.chips{margin-top:14px;display:flex;flex-direction:column;gap:8px}.chip{background:#0f2a1d;border:1px solid #1d5a37;border-radius:8px;padding:8px 12px;font-size:14px;color:#bbf7d0}.feedback{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.feedback label{display:block;color:var(--mut);font-size:14px;margin-bottom:7px}.feedback-actions{margin-top:9px}.message{margin-top:10px;min-height:20px;font-size:14px}.message.ok{color:#86efac}.message.err{color:#fca5a5}.rules{margin-top:22px}.rules ul{margin:0;padding-left:20px;line-height:1.8;color:var(--txt)}.set{display:none;margin-top:14px;grid-template-columns:1fr 1fr;gap:12px}.set.show{display:grid}.set label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}.sw{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:14px}.sw input{width:auto}.warning{border-color:#8a5a10;color:#fcd34d;margin-top:13px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo">Mem<span>Review</span></div><div class="tag">An AI code reviewer that remembers your team's decisions</div></div>
+  <div class="status"><span class="dot" id="dot"></span><span id="stxt">Checking backend...</span><button class="ghost" onclick="toggleSettings()">Settings</button></div>
+</header>
+
+<main>
+  <div class="card">
+    <div id="set" class="set">
+      <div><label>Backend URL</label><input id="api" value="http://localhost:8000"></div>
+      <div><label>Mode</label><div class="sw"><input type="checkbox" id="demo"> Demo mode (fake answers, no Hindsight learning)</div></div>
+    </div>
+    <h3 style="margin-top:14px">Pull request under review</h3>
+    <div class="prmeta"><span class="prnum" id="prnum">PR #58</span><span id="prtitle">Replace alert styling in checkout confirmation</span><span>•</span><span id="prauthor">Priya Shah</span><span>•</span><span id="prdate">2026-09-22</span></div>
+    <textarea id="code" aria-label="Pull-request diff"></textarea>
+    <div class="row"><button class="ghost" onclick="loadDemo('a')">Load PR #58 (inline CSS)</button><button class="ghost" onclick="loadDemo('b')">Load PR #64 (service layer)</button></div>
+    <div class="row"><button id="go" onclick="runReview()">Review: Without vs With Memory</button><span class="note">The same PR is reviewed first without Hindsight, then with Hindsight recall.</span></div>
+    <div id="pageError" class="card warning"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card res no"><span class="badge">✗ WITHOUT MEMORY</span><div class="out ph" id="r0">Generic advice will appear here.</div></div>
+    <div class="card res yes"><span class="badge">✓ WITH HINDSIGHT MEMORY</span><div class="out ph" id="r1">Advice based on your team's past decisions will appear here.</div><div class="chips" id="chips"></div>
+      <div class="feedback" id="feedback" style="display:none"><label for="note">Teach the reviewer (required when rejecting)</label><textarea id="note" placeholder="Example: We also require type hints for all new helper functions."></textarea><div class="feedback-actions"><button class="ghost" onclick="sendFeedback('accepted')">👍 Accept</button><button class="ghost" onclick="sendFeedback('rejected')">👎 Reject and teach</button></div><div class="message" id="feedbackMessage"></div></div>
+    </div>
+  </div>
+
+  <div class="card rules"><h3>Seeded team decisions in Hindsight Cloud</h3><ul><li>Avoid inline CSS; use Tailwind utility classes <span class="tag">(PR #42 · Priya Shah · 2026-08-14)</span></li><li>Null-check API parameters <span class="tag">(PR #37 · Arjun Rao · 2026-07-29)</span></li><li>Use the service layer instead of direct database calls <span class="tag">(PR #51 · Meera Nair · 2026-09-03)</span></li><li>Never log raw passwords, tokens, or API keys <span class="tag">(PR #18 · Karthik Iyer · 2026-06-11)</span></li></ul></div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+let lastReview="";
+let lastReviewId="";
+let currentPR={number:"PR #58",title:"Replace alert styling in checkout confirmation",author:"Priya Shah",date:"2026-09-22"};
+const DEMOS={
+  a:{pr:{number:"PR #58",title:"Replace alert styling in checkout confirmation",author:"Priya Shah",date:"2026-09-22"},code:"<div style={{color: 'red', fontSize: '14px'}}>Error message</div>"},
+  b:{pr:{number:"PR #64",title:"Add customer lookup endpoint",author:"Daniel Kim",date:"2026-09-25"},code:"def get_user(user_id):\n    return db.query(User).filter(User.id == user_id).first()"}
+};
+function toggleSettings(){$("set").classList.toggle("show")}
+function loadDemo(key){currentPR=DEMOS[key].pr;$("code").value=DEMOS[key].code;$("prnum").textContent=currentPR.number;$("prtitle").textContent=currentPR.title;$("prauthor").textContent=currentPR.author;$("prdate").textContent=currentPR.date;clearError()}
+function requestPR(){return {title:`${currentPR.number}: ${currentPR.title}`,author:currentPR.author,date:currentPR.date}}
+function showError(text){const el=$("pageError");el.style.display="block";el.textContent=text}
+function clearError(){const el=$("pageError");el.style.display="none";el.textContent=""}
+function apiError(data,status){return data&&data.detail?data.detail:`Server returned ${status}.`}
+function mock(useMemory){return new Promise(resolve=>setTimeout(()=>resolve(useMemory?{review:"[High] Inline styles found. Team decision in PR #42: use Tailwind utility classes instead of inline CSS.",memories:["PR #42: Avoid inline CSS; use Tailwind utility classes instead."]}:{review:"[Low] Consider moving inline styles into a stylesheet or reusable CSS class."}),500))}
+async function callApi(useMemory){if($("demo").checked)return mock(useMemory);const response=await fetch($("api").value.replace(/\/$/,"")+"/review",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({diff:$("code").value,use_memory:useMemory,pull_request:requestPR()})});const data=await response.json().catch(()=>null);if(!response.ok)throw new Error(apiError(data,response.status));return data}
+function render(id,data){const el=$(id);el.classList.remove("ph");el.textContent=data.review||JSON.stringify(data,null,2);return el.textContent}
+async function runReview(){const diff=$("code").value.trim();clearError();$("feedback").style.display="none";$("chips").innerHTML="";$("feedbackMessage").textContent="";if(!diff){showError("Paste a pull-request diff before starting the review.");return}const button=$("go");button.disabled=true;button.textContent="Reviewing...";$("r0").className="out ph";$("r1").className="out ph";$("r0").textContent="Reviewing without memory...";$("r1").textContent="Recalling team decisions from Hindsight...";try{const generic=await callApi(false);render("r0",generic);const personalized=await callApi(true);lastReview=render("r1",personalized);lastReviewId=crypto.randomUUID();(personalized.memories||[]).forEach(memory=>{const chip=document.createElement("div");chip.className="chip";chip.textContent="🧠 "+memory;$("chips").appendChild(chip)});if(personalized.memory_message){const chip=document.createElement("div");chip.className="chip";chip.textContent=personalized.memory_message;$("chips").appendChild(chip)}$("feedback").style.display="block";setStatus(true)}catch(error){$("r1").className="out";$("r1").textContent="Could not review with memory.";showError(error.message);setStatus(false)}finally{button.disabled=false;button.textContent="Review: Without vs With Memory"}}
+async function sendFeedback(action){clearError();const note=$("note").value.trim();const message=$("feedbackMessage");if(action==="rejected"&&!note){message.className="message err";message.textContent="Add a rule before rejecting, for example: We also require type hints.";return}if($("demo").checked){message.className="message err";message.textContent="Demo mode does not save learning. Untick Demo mode to retain feedback in Hindsight.";return}try{const response=await fetch($("api").value.replace(/\/$/,"")+"/feedback",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({review_id:lastReviewId,review:lastReview,action,diff:$("code").value,note,pull_request:requestPR()})});const data=await response.json().catch(()=>null);if(!response.ok)throw new Error(apiError(data,response.status));message.className="message ok";message.textContent="✓ "+data.message}catch(error){message.className="message err";message.textContent=error.message}}
+function setStatus(ok){$("dot").className="dot "+(ok?"ok":"bad");$("stxt").textContent=$("demo").checked?"Demo mode":ok?"Backend connected":"Backend unavailable"}
+async function ping(){if($("demo").checked){setStatus(true);$("stxt").textContent="Demo mode";return}try{const response=await fetch($("api").value.replace(/\/$/,"")+"/health");if(!response.ok)throw new Error();const health=await response.json();setStatus(true);if(!health.hindsight_configured)showError("Hindsight is not configured. Add HINDSIGHT_API_KEY and HINDSIGHT_BASE_URL to the existing .env, then restart the server.")}catch{setStatus(false)}}
+$("demo").addEventListener("change",ping);$("api").addEventListener("change",ping);loadDemo("a");ping();
+</script>
+</body>
+</html>

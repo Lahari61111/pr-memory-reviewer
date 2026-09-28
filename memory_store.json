@@ -1,0 +1,34 @@
+[
+  {
+    "id": "pr-42-tailwind",
+    "source_pr": "PR #42",
+    "date": "2026-08-14",
+    "author": "Priya Shah",
+    "rule": "Avoid inline CSS; use Tailwind utility classes instead.",
+    "rationale": "The design system is maintained through reusable Tailwind tokens, so inline styles create inconsistent UI and make themes harder to update."
+  },
+  {
+    "id": "pr-37-validation",
+    "source_pr": "PR #37",
+    "date": "2026-07-29",
+    "author": "Arjun Rao",
+    "rule": "Validate and null-check every API parameter before using it in business logic.",
+    "rationale": "A missing request value previously caused a production 500 instead of a clear 400 response."
+  },
+  {
+    "id": "pr-51-service-layer",
+    "source_pr": "PR #51",
+    "date": "2026-09-03",
+    "author": "Meera Nair",
+    "rule": "Route handlers must use the service layer and must not query the database directly.",
+    "rationale": "Keeping database access in services preserves transaction handling, authorization checks, and testability."
+  },
+  {
+    "id": "pr-18-secrets",
+    "source_pr": "PR #18",
+    "date": "2026-06-11",
+    "author": "Karthik Iyer",
+    "rule": "Never log raw passwords, authentication tokens, or API keys, including in debug statements.",
+    "rationale": "Logs are retained and searchable; credentials must be redacted before any logging."
+  }
+]
