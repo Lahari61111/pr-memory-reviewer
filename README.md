@@ -69,7 +69,8 @@ We use a Hindsight-style agent memory layer with three operations:
 
 ## 5. System Architecture & Pipeline
 
-![MemReview Architecture](architecture.png)
+<img width="2440" height="1800" alt="architecture" src="https://github.com/user-attachments/assets/abc6b760-1493-4696-adee-4b60c84aeec0" />
+
 
 ### Step-by-step pipeline
 
