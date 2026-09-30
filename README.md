@@ -1,7 +1,10 @@
 # 🧠 MemReview: A Code Review & Architecture Standards Agent with Long-Term Memory
 
 > An AI pull-request reviewer that **remembers** your team's past review feedback, architectural decisions, and recurring bugs, and gets smarter with every PR.
-
+**Official Hindsight Resources**
+- Hindsight Documentation: https://hindsight.vectorize.io/
+- Hindsight GitHub: https://github.com/vectorize-io/hindsight
+- Hindsight Cloud: https://ui.hindsight.vectorize.io
 ---
 
 ## 1. Problem Statement
